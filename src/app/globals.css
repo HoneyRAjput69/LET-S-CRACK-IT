@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #050816;
+  --accent: #f59e0b;
+  --accent2: #22d3ee;
+}
+
+* { cursor: none; }
+@media (pointer: coarse) { * { cursor: auto; } }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: #e2e8f0;
+  overflow-x: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Grid + nebula background */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(245, 158, 11, 0.14), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, rgba(34, 211, 238, 0.14), transparent 60%),
+    radial-gradient(800px 600px at 50% 100%, rgba(139, 92, 246, 0.16), transparent 60%),
+    var(--bg);
+}
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  transform: perspective(600px) rotateX(55deg) translateY(-10%) scale(1.6);
+  transform-origin: 50% 0%;
+  animation: gridmove 14s linear infinite;
+  opacity: 0.6;
+}
+@keyframes gridmove {
+  from { background-position: 0 0; }
+  to { background-position: 0 48px; }
+}
+
+/* Glass card */
+.glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.glass-strong {
+  background: rgba(10, 14, 32, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(90deg, #fbbf24, #f97316, #22d3ee, #a78bfa);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s ease infinite;
+}
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Glowing border */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle, 0deg), #f59e0b, #22d3ee, #a78bfa, #f59e0b);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-angle 4s linear infinite;
+  opacity: 0.7;
+  pointer-events: none;
+}
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+/* Float */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+/* 3D scene */
+.scene { perspective: 1200px; }
+.preserve-3d { transform-style: preserve-3d; }
+
+@keyframes orbit {
+  from { transform: rotateY(0deg) translateZ(220px) rotateY(0deg); }
+  to { transform: rotateY(360deg) translateZ(220px) rotateY(-360deg); }
+}
+@keyframes spin3d {
+  from { transform: rotateX(0deg) rotateY(0deg); }
+  to { transform: rotateX(360deg) rotateY(360deg); }
+}
+.cube { width: 120px; height: 120px; position: relative; transform-style: preserve-3d; animation: spin3d 18s linear infinite; }
+.cube-face {
+  position: absolute; inset: 0;
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(34, 211, 238, 0.12));
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.25) inset;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  backface-visibility: visible;
+}
+.ring {
+  position: absolute; inset: 0; border-radius: 9999px;
+  border: 1px dashed rgba(34, 211, 238, 0.5);
+  transform-style: preserve-3d;
+}
+
+/* Cursor */
+.cursor-dot {
+  position: fixed; top: 0; left: 0; width: 10px; height: 10px; border-radius: 50%;
+  background: #fbbf24; pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px #fbbf24, 0 0 30px rgba(251, 191, 36, 0.5);
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  position: fixed; top: 0; left: 0; width: 38px; height: 38px; border-radius: 50%;
+  border: 1.5px solid rgba(34, 211, 238, 0.9); pointer-events: none; z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
+}
+.cursor-ring.hovering {
+  width: 64px; height: 64px; border-color: rgba(251, 191, 36, 0.9);
+  background: rgba(251, 191, 36, 0.08);
+}
+@media (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a0f24; }
+::-webkit-scrollbar-thumb { background: linear-gradient(#f59e0b, #22d3ee); border-radius: 8px; }
+
+/* Prose for notes */
+.note-prose h1 { font-size: 1.9rem; font-weight: 800; margin: 1.2rem 0 0.8rem; color: #fbbf24; }
+.note-prose h2 { font-size: 1.35rem; font-weight: 700; margin: 1.6rem 0 0.6rem; color: #67e8f9; }
+.note-prose h3 { font-size: 1.1rem; font-weight: 700; margin: 1.2rem 0 0.5rem; color: #c4b5fd; }
+.note-prose p { margin: 0.5rem 0; line-height: 1.75; color: #cbd5e1; }
+.note-prose ul, .note-prose ol { margin: 0.5rem 0 0.8rem 1.4rem; }
+.note-prose li { margin: 0.3rem 0; line-height: 1.7; color: #cbd5e1; }
+.note-prose ul li { list-style: disc; }
+.note-prose ol li { list-style: decimal; }
+.note-prose strong { color: #fff; }
+.note-prose em { color: #fcd34d; }
+.note-prose blockquote { border-left: 3px solid #f59e0b; padding: 0.6rem 1rem; margin: 1rem 0; background: rgba(245,158,11,0.08); border-radius: 0 0.6rem 0.6rem 0; }
+.note-prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+.note-prose th { background: rgba(34,211,238,0.12); color: #a5f3fc; text-align: left; padding: 0.55rem 0.7rem; border: 1px solid rgba(255,255,255,0.1); }
+.note-prose td { padding: 0.5rem 0.7rem; border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+.note-prose tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+.note-prose code { background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 0.3rem; }
