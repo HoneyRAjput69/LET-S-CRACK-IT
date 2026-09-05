@@ -47,11 +47,86 @@ function composePaper(paperKey: string, subjects: string[], count: number): QSee
   return seededShuffle(out, seed ^ 0x5555).slice(0, count);
 }
 
+/** Create tables on first use so the app works without a separate migration step. */
+async function ensureSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "exams" (
+      "id" serial PRIMARY KEY,
+      "slug" text NOT NULL UNIQUE,
+      "name" text NOT NULL,
+      "full_name" text NOT NULL,
+      "conducted_by" text NOT NULL,
+      "force" text NOT NULL,
+      "eligibility" text NOT NULL,
+      "pattern" text NOT NULL,
+      "description" text NOT NULL,
+      "icon" text NOT NULL,
+      "color" text NOT NULL,
+      "frequency" text NOT NULL
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "papers" (
+      "id" serial PRIMARY KEY,
+      "exam_id" integer NOT NULL REFERENCES "exams"("id") ON DELETE CASCADE,
+      "title" text NOT NULL,
+      "subject" text NOT NULL,
+      "duration_minutes" integer NOT NULL,
+      "marks_per_question" real NOT NULL DEFAULT 1,
+      "negative_marks" real NOT NULL DEFAULT 0.33,
+      "difficulty" text NOT NULL DEFAULT 'Moderate'
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "questions" (
+      "id" serial PRIMARY KEY,
+      "paper_id" integer NOT NULL REFERENCES "papers"("id") ON DELETE CASCADE,
+      "subject" text NOT NULL,
+      "topic" text NOT NULL,
+      "question" text NOT NULL,
+      "options" jsonb NOT NULL,
+      "correct_index" integer NOT NULL,
+      "explanation" text NOT NULL,
+      "difficulty" text NOT NULL DEFAULT 'Moderate'
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "notes" (
+      "id" serial PRIMARY KEY,
+      "slug" text NOT NULL UNIQUE,
+      "exam_id" integer REFERENCES "exams"("id") ON DELETE SET NULL,
+      "subject" text NOT NULL,
+      "title" text NOT NULL,
+      "summary" text NOT NULL,
+      "content" text NOT NULL,
+      "read_minutes" integer NOT NULL DEFAULT 5,
+      "tags" jsonb NOT NULL DEFAULT '[]'::jsonb
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "attempts" (
+      "id" serial PRIMARY KEY,
+      "paper_id" integer NOT NULL REFERENCES "papers"("id") ON DELETE CASCADE,
+      "candidate_name" text NOT NULL DEFAULT 'Aspirant',
+      "answers" jsonb NOT NULL,
+      "score" real NOT NULL,
+      "max_score" real NOT NULL,
+      "correct" integer NOT NULL,
+      "wrong" integer NOT NULL,
+      "skipped" integer NOT NULL,
+      "time_taken_seconds" integer NOT NULL,
+      "completed" boolean NOT NULL DEFAULT true,
+      "created_at" timestamp NOT NULL DEFAULT now()
+    );
+  `);
+}
+
 let seedPromise: Promise<void> | null = null;
 
 export async function ensureSeeded() {
   if (!seedPromise) {
     seedPromise = (async () => {
+      await ensureSchema();
       const [{ c }] = await db.select({ c: sql<number>`count(*)::int` }).from(exams);
       if (Number(c) > 0) return;
       await seedAll();
